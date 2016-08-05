@@ -1,0 +1,26 @@
+{
+	"name" : "php-extended/php-ip",
+	"description" : "An object implementation of the ip addresses and their parsing",
+	"type" : "library",
+	"homepage" : "https://github.com/php-extended/php-ip",
+	"license" : "MIT",
+	"authors" : [{
+			"name" : "Anastaszor",
+			"role" : "developer"
+		}
+	],
+	"support" : {
+		"issues" : "https://github.com/php-extended/php-ip/issues",
+		"source" : "https://github.com/php-extended/php-ip"
+	},
+	"autoload" : {
+		"psr-4" : {
+			"PhpExtended\\Ip" : "src/PhpExtended/Ip"
+		}
+	},
+	"keywords" : [
+		"ip",
+		"ipv4",
+		"ipv6"
+	]
+}
