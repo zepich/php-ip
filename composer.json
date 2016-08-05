@@ -15,7 +15,7 @@
 	},
 	"autoload" : {
 		"psr-4" : {
-			"PhpExtended\\Ip" : "src/PhpExtended/Ip"
+			"PhpExtended\\Ip\\" : "src/PhpExtended/Ip"
 		}
 	},
 	"keywords" : [
