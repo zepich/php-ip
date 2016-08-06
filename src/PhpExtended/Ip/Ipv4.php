@@ -85,6 +85,46 @@ class Ipv4
 	}
 	
 	/**
+	 * Gets the first byte.
+	 * 
+	 * @return number between 0 and 255.
+	 */
+	public function getFirstByte()
+	{
+		return $this->_oct1;
+	}
+	
+	/**
+	 * Gets the second byte.
+	 * 
+	 * @return number between 0 and 255.
+	 */
+	public function getSecondByte()
+	{
+		return $this->_oct2;
+	}
+	
+	/**
+	 * Gets the third byte.
+	 * 
+	 * @return number between 0 and 255.
+	 */
+	public function getThirdByte()
+	{
+		return $this->_oct3;
+	}
+	
+	/**
+	 * Gets the last byte.
+	 * 
+	 * @return number between 0 and 255.
+	 */
+	public function getLastByte()
+	{
+		return $this->_oct4;
+	}
+	
+	/**
 	 * This function returns the exact unsigned 32 bit integer that corresponds
 	 * to this ip address.
 	 * 
