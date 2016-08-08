@@ -77,15 +77,21 @@ class Ipv4Tokenizer implements \Iterator
 			return;
 		}
 		
-		if($content instanceof Ipv6 && $content->isInRange('::ffff:0:0/96'))
+		if($content instanceof Ipv6)
 		{
-			$this->_object = array(
-				($content->getSeventhGroup() >> 8) & 0x000000ff,
-				 $content->getSeventhGroup()       & 0x000000ff,
-				($content->getEighthGroup() >> 8)  & 0x000000ff,
-				 $content->getEighthGroup()        & 0x000000ff,
+			if($content->isInRange('::ffff:0:0/96'))
+			{
+				$this->_object = array(
+					($content->getSeventhGroup() >> 8) & 0x000000ff,
+					 $content->getSeventhGroup()       & 0x000000ff,
+					($content->getEighthGroup() >> 8)  & 0x000000ff,
+					 $content->getEighthGroup()        & 0x000000ff,
+				);
+				return;
+			}
+			throw new IllegalRangeException($content, 
+				'The given ipv6 is not in range of ipv4 wrapping range which is ::ffff:0:0/96 : {data} given.'
 			);
-			return;
 		}
 		
 		if(is_float($content))
@@ -134,11 +140,13 @@ class Ipv4Tokenizer implements \Iterator
 						);
 						return;
 					}
-					else
-						throw new IllegalRangeException('/'.$content);
+					throw new IllegalRangeException('/'.$content,
+						'The given bitmask is not in range of allowed bitmasks which is 0 to 32 : {data} given.'
+					);
 				}
-				else 
-					throw new IllegalValueException('/'.$content);
+				throw new IllegalValueException('/'.$content,
+					'The given bitmask is not a numerical bitmask : {data} given.'
+				);
 			}
 			
 			if($content[0] === '\\')
@@ -161,11 +169,13 @@ class Ipv4Tokenizer implements \Iterator
 						);
 						return;
 					}
-					else 
-						throw new IllegalRangeException('\\'.$content);
+					throw new IllegalRangeException('\\'.$content,
+						'The given bitmask is not in range of allowed bitmasks which is 0 to 32 : {data} given.'
+					);
 				}
-				else
-					throw new IllegalValueException('\\'.$content);
+				throw new IllegalValueException('\\'.$content,
+					'The given bitmask is not a numerical bitmask : {data} given.'
+				);
 			}
 			
 			$token = '';
@@ -181,14 +191,22 @@ class Ipv4Tokenizer implements \Iterator
 				{
 					$value = (int) $token;
 					if($value < 0 || $value > 255)
-						throw new IllegalValueException($content);
+						throw new IllegalValueException($content,
+							'The ip address contains a number which is not between 0 and 255 : {data} given.'
+						);
 					
 					if(count($this->_object) < 4)
 						$this->_object[] = $value;
 					else
-						throw new IpMalformedException($content);
+						throw new IpMalformedException($content,
+							'The ip address contains more than 4 bit groups : {data} given.'
+						);
+					
+					continue;
 				}
-				throw new IpMalformedException($content);
+				throw new IpMalformedException($content,
+					'The ip address contains a non-numeric non-dot character : {data} given.'
+				);
 			}
 			return;
 		}
@@ -201,20 +219,29 @@ class Ipv4Tokenizer implements \Iterator
 				{
 					$singleContent = (int) $singleContent;
 					if($singleContent < 0 || $singleContent > 255)
-						throw new IllegalValueException($singleContent);
+						throw new IllegalValueException($content,
+							'The ip address contains a number which is not between 0 and 255 : {data} given.'
+						);
 					
 					if(count($this->_object) < 4)
 						$this->_object[] = $singleContent;
 					else
-						throw new IpMalformedException($content);
+						throw new IpMalformedException($content,
+							'The ip address contains more than 4 bit groups : {data} given.'
+						);
+					
+					continue;
 				}
-				else 
-					throw new IpMalformedException($content);
+				throw new IpMalformedException($content,
+					'The ip address contains a non-numeric non-dot character : {data} given.'
+				);
 			}
 			return;
 		}
 		
-		throw new IllegalArgumentException($content);
+		throw new IllegalArgumentException($content,
+			'The given ip address is not parsable. You should better use the integer, a string with the dotted notation, or an array with integers to specify the bits of the ip address : {data} given.'
+		);
 	}
 	
 	/**
