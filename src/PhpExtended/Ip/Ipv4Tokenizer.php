@@ -40,6 +40,8 @@ class Ipv4Tokenizer implements \Iterator
 	 * - an integer will be interpreted as signed 32-bit ip address. For example,
 	 * 		167772285 will be interpreted as 10.0.0.125
 	 * - a string will be parsed in canonical form (incomplete strings throws exceptions)
+	 * - special strings:
+	 * 		'localhost', 'loopback', 'lo' and 'eth0' will be interpreted as 127.0.0.1 
 	 * - an array will be interpreted as the 4-parts of the ip.
 	 * 
 	 * @param mixed $content
@@ -76,10 +78,10 @@ class Ipv4Tokenizer implements \Iterator
 		if($content instanceof Ipv6 && $content->isInRange('::ffff:0:0/96'))
 		{
 			$this->_object = array(
-				$content->getSeventhGroup() && 0xff00 >> 8,
-				$content->getSeventhGroup() && 0x00ff,
-				$content->getEighthGroup() && 0xff00 >> 8,
-				$content->getEighthGroup() && 0x00ff,
+				($content->getSeventhGroup() >> 8) & 0x000000ff,
+				 $content->getSeventhGroup()       & 0x000000ff,
+				($content->getEighthGroup() >> 8)  & 0x000000ff,
+				 $content->getEighthGroup()        & 0x000000ff,
 			);
 			return;
 		}
@@ -92,10 +94,10 @@ class Ipv4Tokenizer implements \Iterator
 		if(is_int($content))
 		{
 			$this->_object = array(
-				($content >> 24) && 0xff,
-				($content >> 16) && 0xff,
-				($content >>  8) && 0xff,
-				 $content        && 0xff,
+				($content >> 24) & 0x000000ff,
+				($content >> 16) & 0x000000ff,
+				($content >>  8) & 0x000000ff,
+				 $content        & 0x000000ff,
 			);
 			return;
 		}

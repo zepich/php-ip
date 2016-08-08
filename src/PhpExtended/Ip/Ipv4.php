@@ -12,6 +12,7 @@ namespace PhpExtended\Ip;
  */
 class Ipv4
 {
+	
 	/**
 	 * This is the first octet of the ip address. In the ip 192.168.0.1, 
 	 * this corresponds to the 192. This integer is always between 0 and 255,
