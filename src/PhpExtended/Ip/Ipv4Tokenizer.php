@@ -41,7 +41,9 @@ class Ipv4Tokenizer implements \Iterator
 	 * 		167772285 will be interpreted as 10.0.0.125
 	 * - a string will be parsed in canonical form (incomplete strings throws exceptions)
 	 * - special strings:
-	 * 		'localhost', 'loopback', 'lo' and 'eth0' will be interpreted as 127.0.0.1 
+	 * 		'localhost', 'loopback', 'lo' and 'eth0' will be interpreted as 127.0.0.1
+	 * 		/24 will be interpreted as the network mask 11111111 11111111 11111111 00000000
+	 * 		\24 will be interpreted as the wildcard mask 00000000 00000000 00000000 11111111 
 	 * - an array will be interpreted as the 4-parts of the ip.
 	 * 
 	 * @param mixed $content
@@ -110,6 +112,62 @@ class Ipv4Tokenizer implements \Iterator
 				$this->_object = array(127, 0, 0, 1);
 				return;
 			}
+			
+			if($content[0] === '/')
+			{
+				$content = trim('/', $content);
+				if(is_numeric($content))
+				{
+					$content = (int) $content;
+					if($content >= 0 && $content <= 32)
+					{
+						$accu = 0;
+						for($i = 0; $i < 32 - $content; $i++)
+							$accu = $accu | (1 << $i);
+						
+						$value = ~ $accu;
+						$this->_object = array(
+							($value >> 24) & 0x000000ff,
+							($value >> 16) & 0x000000ff,
+							($value >> 8)  & 0x000000ff,
+							 $value        & 0x000000ff,
+						);
+						return;
+					}
+					else
+						throw new IllegalRangeException('/'.$content);
+				}
+				else 
+					throw new IllegalValueException('/'.$content);
+			}
+			
+			if($content[0] === '\\')
+			{
+				$content = trim('\\', $content);
+				if(is_numeric($content))
+				{
+					$content = (int) $content;
+					if($content >= 0 && $content <= 32)
+					{
+						$value = 0;
+						for($i = 0; $i < 32 - $content; $i++)
+							$value = $value | (1 << $i);
+						
+						$this->_object = array(
+							($value >> 24) & 0x000000ff,
+							($value >> 16) & 0x000000ff,
+							($value >> 8)  & 0x000000ff,
+							 $value        & 0x000000ff,
+						);
+						return;
+					}
+					else 
+						throw new IllegalRangeException('\\'.$content);
+				}
+				else
+					throw new IllegalValueException('\\'.$content);
+			}
+			
 			$token = '';
 			for($i = 0; $i = strlen($content); $i++)
 			{

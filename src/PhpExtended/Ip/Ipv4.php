@@ -67,6 +67,14 @@ class Ipv4 implements Ip
 	 * If the given ip address is incomplete or seriously damaged, then an
 	 * IpMalformedException will be thrown.
 	 * 
+	 * If a string which starts with '/' is provided, it will be interpreted as
+	 * the bitmask. For example, the '/24' address will be the 255.255.255.0
+	 * address.
+	 * 
+	 * If a string which starts with '\' is provided, it will be interpreted as
+	 * the inverse bitmask. For example, the '\24' address will be the 0.0.0.255
+	 * address.
+	 * 
 	 * @param mixed $ipAddress
 	 * @throws IllegalArgumentException if the content value is not interpretable
 	 * @throws IllegalValueException if the parsed integers are not in [0-255]
@@ -164,6 +172,67 @@ class Ipv4 implements Ip
 	public function __toString()
 	{
 		return $this->getCanonicalRepresentation();
+	}
+	
+	/**
+	 * Does the bitwise OR operation for each bit of this address, using the 
+	 * other given address.
+	 * 
+	 * @param Ipv4 $other
+	 * @return Ipv4 the result
+	 */
+	public function _or(Ipv4 $other)
+	{
+		return new Ipv4($this->getSignedValue() | $other->getSignedValue());
+	}
+	
+	/**
+	 * Does the bitwise AND operation for each bit of this address, using the
+	 * other given address.
+	 * 
+	 * @param Ipv4 $other
+	 * @return Ipv4 the result
+	 */
+	public function _and(Ipv4 $other)
+	{
+		return new Ipv4($this->getSignedValue() & $other->getSignedValue());
+	}
+	
+	/**
+	 * Does the bitwise NOT operation for each bit of this address, using the
+	 * other given address.
+	 * 
+	 * @return Ipv4 the result
+	 */
+	public function _not()
+	{
+		return new Ipv4( ~ $this->getSignedValue());
+	}
+	
+	/**
+	 * Does the addition of this address with the given address. Each byte adds
+	 * up separately with remainders. No address may add upper than the 
+	 * 255.255.255.255 address.
+	 * 
+	 * @param Ipv4 $other
+	 * @return Ipv4 the result
+	 */
+	public function add(Ipv4 $other)
+	{
+		return new Ipv4(min(4294967295, $this->getSignedValue() + $other->getSignedValue()));
+	}
+	
+	/**
+	 * Does the substraction of this address with the given address. Each byte
+	 * substracts up separately with remainteds. No adderss may substract lower
+	 * than the 0.0.0.0 address.
+	 * 
+	 * @param Ipv4 $other
+	 * @return Ipv4 the result
+	 */
+	public function substract(Ipv4 $other)
+	{
+		return new Ipv4(max(0, $this->getSignedValue() - $other->getSignedValue()));
 	}
 	
 }
