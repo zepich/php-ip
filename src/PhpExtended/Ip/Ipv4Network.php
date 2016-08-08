@@ -28,7 +28,25 @@ class Ipv4Network
 	private $_mask_bits = null;
 	
 	/**
-	 * Builds a new Ipv4Network object with given ip address and bitmask.
+	 * Builds a new Ipv4Network object with given ip address and bitmask. The
+	 * given ipAddress object may be anything which is useful to build an Ipv4
+	 * address. See {@link Ipv4} for more explanations.
+	 * 
+	 * It is still possible to define a network using only the ipAddress with 
+	 * the CIDR notation, without the bitmask argument. For example, the default
+	 * class-A network is 10.0.0.0/8.
+	 * 
+	 * It is also possible to define a network using a configuration array like
+	 * array(10, 0, 0, 0, 8) ; or array(10, 0, 0, 0, 'mask' => 8). The 'mask'
+	 * element or the fifth element of the array will be used as bitmask when
+	 * building this network.
+	 * 
+	 * This network can also be build as a subnet of an existing network by
+	 * setting the bitmask to another value.
+	 * 
+	 * When the bitmask is not precised and cannot be found into the ipAddress
+	 * representation, the default bitmask for class-A through class-E networks
+	 * will be used (A:8 ; B:16 ; C:24 ; D:28 ; E:32).
 	 * 
 	 * @param mixed $ipAddress
 	 * @return integer $bitmask
@@ -37,16 +55,11 @@ class Ipv4Network
 	 * @throws IllegalRangeException if the ipv6 range is not in ::ffff:0:0/96
 	 * @throws IpMalformedException if the value cannot be interpreted
 	 */
-	public function __construct($ipAddress, $bitmask = null)
+	public function __construct($ipAddress = null, $bitmask = null)
 	{
-		if(is_numeric($bitmask))
-			$mask = (int) $bitmask;
-		elseif(is_string($ipAddress) && ($dp = strpos($ipAddress, '/')) !== false)
-		{
-			$ipAddress = substr($ipAddress, 0, $dp);
-			$mask = (int) substr($ipAddress, $dp + 1);
-		}
-		elseif(is_array($ipAddress) && count($ipAddress) === 5)
+		if($ipAddress instanceof Ipv4Network)
+			$ipAddress = $ipAddress->getStartIp();
+		if(is_array($ipAddress) && count($ipAddress) === 5)
 		{
 			if(isset($ipAddress['mask']) && is_numeric($ipAddress['mask']))
 			{
@@ -59,8 +72,13 @@ class Ipv4Network
 				unset($ipAddress[4]);
 			}
 		}
-		elseif($ipAddress instanceof Ipv4Network)
-			$ipAddress = $ipAddress->getStartIp();
+		if(is_string($ipAddress) && ($dp = strpos($ipAddress, '/')) !== false)
+		{
+			$ipAddress = substr($ipAddress, 0, $dp);
+			$mask = (int) substr($ipAddress, $dp + 1);
+		}
+		if(is_numeric($bitmask))
+			$mask = (int) $bitmask;
 		// else assume default mask from ip address
 		$this->_start_ip = new Ipv4($ipAddress);
 		if(!isset($mask))

@@ -56,7 +56,27 @@ class IpException extends \Exception
 		if(is_scalar($data))
 			return "$data";
 		if(is_array($data))
-			return 'array('.count($data).')';
+		{
+			$datum = array();
+			foreach($data as $inner)
+			{
+				if(is_scalar($inner))
+					$datum[] = "$inner";
+				if(is_array($inner))
+					$datum[] = 'array('.count($inner).')';
+				if(is_object($inner))
+					$datum[] = 'object('.get_class($inner).')';
+				if(is_resource($inner))
+					$datum[] = 'resource('.get_resource_type($inner).')';
+				if($inner === null)
+					$datum[] = 'null';
+				if($inner === false)
+					$datum[] = 'false';
+				if($inner === true)
+					$datum[] = 'true';
+			}
+			return 'array('.implode(', ', $datum).')';
+		}
 		if(is_object($data))
 			return 'object('.get_class($data).')';
 		if(is_resource($data))
