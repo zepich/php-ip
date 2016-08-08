@@ -10,7 +10,7 @@ namespace PhpExtended\Ip;
  * @author Anastaszor
  * @see https://www.rfc-editor.org/rfc/rfc791.txt
  */
-class Ipv4
+class Ipv4 implements Ip
 {
 	
 	/**
@@ -68,9 +68,10 @@ class Ipv4
 	 * IpMalformedException will be thrown.
 	 * 
 	 * @param mixed $ipAddress
-	 * @throws IllegalArgumentException
-	 * @throws IllegalRangeException
-	 * @throws IpMalformedException
+	 * @throws IllegalArgumentException if the content value is not interpretable
+	 * @throws IllegalValueException if the parsed integers are not in [0-255]
+	 * @throws IllegalRangeException if the ipv6 range is not in ::ffff:0:0/96
+	 * @throws IpMalformedException if the value cannot be interpreted
 	 */
 	public function __construct($ipAddress = null)
 	{
@@ -137,9 +138,8 @@ class Ipv4
 	}
 	
 	/**
-	 * Gets the short representation of this ip address.
-	 * 
-	 * @return string
+	 * (non-PHPdoc)
+	 * @see Ip::getShortRepresentation()
 	 */
 	public function getShortRepresentation()
 	{
@@ -148,9 +148,8 @@ class Ipv4
 	}
 	
 	/**
-	 * Gets the canonical representation of this ip address.
-	 * 
-	 * @return string
+	 * (non-PHPdoc)
+	 * @see Ip::getCanonicalRepresentation()
 	 */
 	public function getCanonicalRepresentation()
 	{
