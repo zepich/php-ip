@@ -78,10 +78,10 @@ class Ipv4
 		$tokenizer = new Ipv4Tokenizer();
 		$tokenizer->tokenize($ipAddress);
 		
-		$this->_oct1 = $tokenizer->getNextToken();
-		$this->_oct2 = $tokenizer->getNextToken();
-		$this->_oct3 = $tokenizer->getNextToken();
-		$this->_oct4 = $tokenizer->getNextToken();
+		$this->_oct1 = (int) $tokenizer->getNextToken();
+		$this->_oct2 = (int) $tokenizer->getNextToken();
+		$this->_oct3 = (int) $tokenizer->getNextToken();
+		$this->_oct4 = (int) $tokenizer->getNextToken();
 	}
 	
 	/**
@@ -136,13 +136,34 @@ class Ipv4
 	}
 	
 	/**
+	 * Gets the short representation of this ip address.
+	 * 
+	 * @return string
+	 */
+	public function getShortRepresentation()
+	{
+		if($this->getSignedValue() === 2130706433) return 'localhost';
+		return $this->getCanonicalRepresentation();
+	}
+	
+	/**
+	 * Gets the canonical representation of this ip address.
+	 * 
+	 * @return string
+	 */
+	public function getCanonicalRepresentation()
+	{
+		return $this->_oct1.'.'.$this->_oct2.'.'.$this->_oct3.'.'.$this->_oct4;
+	}
+	
+	/**
 	 * Gets a string representation of the ip address.
 	 * 
 	 * @return string
 	 */
 	public function __toString()
 	{
-		return $this->_oct1.'.'.$this->_oct2.'.'.$this->_oct3.'.'.$this->_oct4;
+		return $this->getCanonicalRepresentation();
 	}
 	
 }

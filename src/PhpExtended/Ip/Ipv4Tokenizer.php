@@ -2,8 +2,17 @@
 
 namespace PhpExtended\Ip;
 
+/**
+ * Ipv4Tokenizer class file.
+ * 
+ * This class is made to transform any input as the components of an ipv4. It
+ * acts as a factory.
+ * 
+ * @author Anastaszor
+ */
 class Ipv4Tokenizer implements \Iterator
 {
+	
 	/**
 	 * The bytes of the address which were successfully parsed.
 	 * 
@@ -21,14 +30,38 @@ class Ipv4Tokenizer implements \Iterator
 	/**
 	 * Parses the given content and retrieves the bytes that formed the address.
 	 * 
+	 * Special cases :
+	 * - null will be interpreted as 0.0.0.0
+	 * - false will be interpreted as 0.0.0.0
+	 * - true will be interpreted as 127.0.0.1
+	 * - an Ipv4 instance will be cloned as-is
+	 * - an Ipv6 instance will be reduced if in range ::ffff:0:0/96
+	 * - a float content will be converted to integer
+	 * - an integer will be interpreted as signed 32-bit ip address. For example,
+	 * 		167772285 will be interpreted as 10.0.0.125
+	 * - a string will be parsed in canonical form (incomplete strings throws exceptions)
+	 * - an array will be interpreted as the 4-parts of the ip.
+	 * 
 	 * @param mixed $content
-	 * @throws IllegalArgumentException
-	 * @throws IllegalValueException
-	 * @throws IllegalRangeException 
-	 * @throws IpMalformedException
+	 * @throws IllegalArgumentException if the content value is not interpretable
+	 * @throws IllegalValueException if the parsed integers are not in [0-255]
+	 * @throws IllegalRangeException if the ipv6 range is not in ::ffff:0:0/96
+	 * @throws IpMalformedException if the value cannot be interpreted
 	 */
-	public function tokenize($content)
+	public function tokenize($content = null)
 	{
+		if($content === null || $content === false)
+		{
+			$this->_object = array(0, 0, 0, 0);
+			return;
+		}
+		
+		if($content === true)
+		{
+			$this->_object = array(127, 0, 0, 1);
+			return;
+		}
+		
 		if($content instanceof Ipv4)
 		{
 			$this->_object = array(
@@ -36,6 +69,17 @@ class Ipv4Tokenizer implements \Iterator
 				$content->getSecondByte(),
 				$content->getThirdByte(),
 				$content->getLastByte(),
+			);
+			return;
+		}
+		
+		if($content instanceof Ipv6 && $content->isInRange('::ffff:0:0/96'))
+		{
+			$this->_object = array(
+				$content->getSeventhGroup() && 0xff00 >> 8,
+				$content->getSeventhGroup() && 0x00ff,
+				$content->getEighthGroup() && 0xff00 >> 8,
+				$content->getEighthGroup() && 0x00ff,
 			);
 			return;
 		}
@@ -58,6 +102,12 @@ class Ipv4Tokenizer implements \Iterator
 		
 		if(is_string($content))
 		{
+			if($content === 'localhost' || $content === 'lo' 
+				|| $content === 'loopback' || $content === 'eth0'
+			) {
+				$this->_object = array(127, 0, 0, 1);
+				return;
+			}
 			$token = '';
 			for($i = 0; $i = strlen($content); $i++)
 			{
@@ -83,7 +133,7 @@ class Ipv4Tokenizer implements \Iterator
 			return;
 		}
 		
-		if(is_array($content))
+		if(is_array($content) && count($content) === 4)
 		{
 			foreach($content as $singleContent)
 			{
@@ -107,6 +157,12 @@ class Ipv4Tokenizer implements \Iterator
 		throw new IllegalArgumentException($content);
 	}
 	
+	/**
+	 * Gets the next token. This should be an integer between 0 and 255. This
+	 * returns null if there is no more tokens.
+	 * 
+	 * @return integer
+	 */
 	public function getNextToken()
 	{
 		if(isset($this->_object[$this->_actual]))
