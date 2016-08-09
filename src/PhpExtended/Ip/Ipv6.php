@@ -332,7 +332,7 @@ class Ipv6 implements Ip
 	 * @param Ipv6 $other
 	 * @return Ipv6 the result
 	 */
-	public function _not(Ipv6 $other)
+	public function _not()
 	{
 		$new = new Ipv6();
 		$new->_group1 = ~ $this->_group1;
@@ -391,7 +391,9 @@ class Ipv6 implements Ip
 	 */
 	public function substract(Ipv6 $other)
 	{
-		
+		$new1 = $other->_not();
+		$new2 = $this->add($new1);
+		return $new2->add(new Ipv6(array(0, 0, 0, 0, 0, 0, 0, 1)));
 	}
 	
 }

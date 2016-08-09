@@ -258,7 +258,9 @@ class Ipv4 implements Ip
 	 */
 	public function substract(Ipv4 $other)
 	{
-		return new Ipv4(max(0, $this->getSignedValue() - $other->getSignedValue()));
+		$new1 = $other->_not();
+		$new2 = $this->add($new1);
+		return $new2->add(new Ipv4(array(0, 0, 0, 1)));
 	}
 	
 }
