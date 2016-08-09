@@ -8,7 +8,7 @@ namespace PhpExtended\Ip;
  * This class represents an Ipv4 as specified into rfc 791.
  * 
  * @author Anastaszor
- * @see https://www.rfc-editor.org/rfc/rfc791.txt
+ * @see https://www.ietf.org/rfc/rfc791.txt
  */
 class Ipv4 implements Ip
 {
@@ -97,7 +97,7 @@ class Ipv4 implements Ip
 	/**
 	 * Gets the first byte.
 	 * 
-	 * @return number between 0 and 255.
+	 * @return integer between 0 and 255.
 	 */
 	public function getFirstByte()
 	{
@@ -107,7 +107,7 @@ class Ipv4 implements Ip
 	/**
 	 * Gets the second byte.
 	 * 
-	 * @return number between 0 and 255.
+	 * @return integer between 0 and 255.
 	 */
 	public function getSecondByte()
 	{
@@ -117,7 +117,7 @@ class Ipv4 implements Ip
 	/**
 	 * Gets the third byte.
 	 * 
-	 * @return number between 0 and 255.
+	 * @return integer between 0 and 255.
 	 */
 	public function getThirdByte()
 	{
@@ -127,7 +127,7 @@ class Ipv4 implements Ip
 	/**
 	 * Gets the last byte.
 	 * 
-	 * @return number between 0 and 255.
+	 * @return integer between 0 and 255.
 	 */
 	public function getLastByte()
 	{
@@ -183,7 +183,12 @@ class Ipv4 implements Ip
 	 */
 	public function _or(Ipv4 $other)
 	{
-		return new Ipv4($this->getSignedValue() | $other->getSignedValue());
+		$new = new Ipv4();
+		$new->_oct1 = $this->_oct1 | $other->_oct1;
+		$new->_oct2 = $this->_oct2 | $other->_oct2;
+		$new->_oct3 = $this->_oct3 | $other->_oct3;
+		$new->_oct4 = $this->_oct4 | $other->_oct4;
+		return $new;
 	}
 	
 	/**
@@ -195,18 +200,27 @@ class Ipv4 implements Ip
 	 */
 	public function _and(Ipv4 $other)
 	{
-		return new Ipv4($this->getSignedValue() & $other->getSignedValue());
+		$new = new Ipv4();
+		$new->_oct1 = $this->_oct1 & $other->_oct1;
+		$new->_oct2 = $this->_oct2 & $other->_oct2;
+		$new->_oct3 = $this->_oct3 & $other->_oct3;
+		$new->_oct4 = $this->_oct4 & $other->_oct4;
+		return $new;
 	}
 	
 	/**
-	 * Does the bitwise NOT operation for each bit of this address, using the
-	 * other given address.
+	 * Does the bitwise NOT operation for each bit of this address.
 	 * 
 	 * @return Ipv4 the result
 	 */
 	public function _not()
 	{
-		return new Ipv4( ~ $this->getSignedValue());
+		$new = new Ipv4();
+		$new->_oct1 = ~ $this->_oct1;
+		$new->_oct2 = ~ $this->_oct2;
+		$new->_oct3 = ~ $this->_oct3;
+		$new->_oct4 = ~ $this->_oct4;
+		return $new;
 	}
 	
 	/**
@@ -219,7 +233,19 @@ class Ipv4 implements Ip
 	 */
 	public function add(Ipv4 $other)
 	{
-		return new Ipv4(min(4294967295, $this->getSignedValue() + $other->getSignedValue()));
+		$new = new Ipv4();
+		$add4 = $this->_oct4 + $other->_oct4;
+		$new->_oct4 = $add4 & 0x000000ff;
+		$rmd3 = ($add4 & 0x0000ff00) >> 8;
+		$add3 = $this->_oct3 + $other->_oct3 + $rmd3;
+		$new->_oct3 = $add3 & 0x000000ff;
+		$rmd2 = ($add3 & 0x0000ff00) >> 8;
+		$add2 = $this->_oct2 + $other->_oct2 + $rmd2;
+		$new->_oct2 = $add2 & 0x000000ff;
+		$rmd1 = ($add2 & 0x0000ff00) >> 8;
+		$add1 = $this->_oct1 + $other->_oct1 + $rmd1;
+		$new->_oct1 = $add1 & 0x000000ff;
+		return $new;
 	}
 	
 	/**
