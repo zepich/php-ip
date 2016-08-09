@@ -91,7 +91,37 @@ class Ipv6 implements Ip
 	 */
 	private $_group8 = 0;
 	
-	
+	/**
+	 * Builds a new Ipv6 address from a given object. This object can be an ip
+	 * address, an integer, or a string which represents an ip address.
+	 * 
+	 * If null is provided, this is interpreted as :: (full zero) address.
+	 * If 'localhost' is provided, this is interpreted as ::1 ip address.
+	 * 
+	 * If an Ipv4 is provided, it will be transformed into an ipv6 within range
+	 * of ::ffff:0:0/96.
+	 * If an Ipv6 is provided, it will be cloned as-is.
+	 * 
+	 * If the given argument is not parseable as an ip address, then an 
+	 * IllegalArgumentException will be thrown.
+	 * 
+	 * If the given ip address is incomplete or seriously damaged, then an
+	 * IpMalformedException will be thrown.
+	 * 
+	 * If a string which starts with '/' is provided, it will be interpreted as
+	 * the bitmask. For example, the '/64' address will be the
+	 * ffff:ffff:ffff:ffff:: address.
+	 * 
+	 * If a string which starts with '\\' is provided, it will be interpreted
+	 * as the inverse bitmask. For example, the '\64' address will be the
+	 * ::ffff:ffff:ffff:ffff address.
+	 * 
+	 * @param mixed $ipAddress
+	 * @throws IllegalArgumentException if the content value is not intepretable
+	 * @throws IllegalRangeException if the bitmasks are not in [0-128]
+	 * @throws IllegalValueException if the parsed integers ar not in [0-65535]
+	 * @throws IpMalformedException if an error occur while interpreting the value
+	 */
 	public function __construct($ipAddress = null)
 	{
 		if(empty($ipAddress)) return;
@@ -358,25 +388,25 @@ class Ipv6 implements Ip
 		$new = new Ipv6();
 		$add8 = $this->_group8 + $other->_group8;
 		$new->_group8 = $add8 & 0x0000ffff;
-		$rmd7 = ($add8 & 0xffff0000) >> 16;
+		$rmd7 = ($add8 >> 16) & 0x0000ffff;
 		$add7 = $this->_group7 + $other->_group7 + $rmd7;
 		$new->_group7 = $add7 & 0x0000ffff;
-		$rmd6 = ($add7 & 0xffff0000) >> 16;
+		$rmd6 = ($add7 >> 16) & 0x0000ffff;
 		$add6 = $this->_group6 + $other->_group6 + $rmd6;
 		$new->_group6 = $add6 & 0x0000ffff;
-		$rmd5 = ($add6 & 0xffff0000) >> 16;
+		$rmd5 = ($add6 >> 16) & 0x0000ffff;
 		$add5 = $this->_group5 + $other->_group5 + $rmd5;
 		$new->_group5 = $add5 & 0x0000ffff;
-		$rmd4 = ($add5 & 0xffff0000) >> 16;
+		$rmd4 = ($add5 >> 16) & 0x0000ffff;
 		$add4 = $this->_group4 + $other->_group4 + $rmd4;
 		$new->_group4 = $add4 & 0x0000ffff;
-		$rmd3 = ($add4 & 0xffff0000) >> 16;
+		$rmd3 = ($add4 >> 16) & 0x0000ffff;
 		$add3 = $this->_group3 + $other->_group3 + $rmd3;
 		$new->_group3 = $add3 & 0x0000ffff;
-		$rmd2 = ($add3 & 0xffff0000) >> 16;
+		$rmd2 = ($add3 >> 16) & 0x0000ffff;
 		$add2 = $this->_group2 + $other->_group2 + $rmd2;
 		$new->_group2 = $add2 & 0x0000ffff;
-		$rmd1 = ($add2 & 0xffff0000) >> 16;
+		$rmd1 = ($add2 >> 16) & 0x0000ffff;
 		$add1 = $this->_group1 + $other->_group1 + $rmd1;
 		$new->_group1 = $add1 & 0x0000ffff;
 		return $new;

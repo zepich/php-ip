@@ -50,7 +50,7 @@ class Ipv4Tokenizer implements \Iterator
 	 * @throws IllegalArgumentException if the content value is not interpretable
 	 * @throws IllegalValueException if the parsed integers are not in [0-255]
 	 * @throws IllegalRangeException if the ipv6 range is not in ::ffff:0:0/96
-	 * @throws IpMalformedException if the value cannot be interpreted
+	 * @throws IpMalformedException if an error occur while interpreting the value
 	 */
 	public function tokenize($content = null)
 	{
@@ -78,7 +78,7 @@ class Ipv4Tokenizer implements \Iterator
 		}
 		
 		if($content instanceof Ipv6)
-		{
+		{ 
 			if($content->isInRange('::ffff:0:0/96'))
 			{
 				$this->_object = array(
@@ -119,9 +119,9 @@ class Ipv4Tokenizer implements \Iterator
 				return;
 			}
 			
-			if($content[0] === '/')
+			if($content[0] === '/')		// assumed bitwise mask
 			{
-				$content = trim('/', $content);
+				$content = trim($content, '/');
 				if(is_numeric($content))
 				{
 					$content = (int) $content;
@@ -149,9 +149,9 @@ class Ipv4Tokenizer implements \Iterator
 				);
 			}
 			
-			if($content[0] === '\\')
+			if($content[0] === '\\')		// assumed wildcard mask
 			{
-				$content = trim('\\', $content);
+				$content = trim($content, '\\');
 				if(is_numeric($content))
 				{
 					$content = (int) $content;
@@ -202,6 +202,7 @@ class Ipv4Tokenizer implements \Iterator
 							'The ip address contains more than 4 bit groups : {data} given.'
 						);
 					
+					$token = '';
 					continue;
 				}
 				throw new IpMalformedException($content,
@@ -233,7 +234,7 @@ class Ipv4Tokenizer implements \Iterator
 					continue;
 				}
 				throw new IpMalformedException($content,
-					'The ip address contains a non-numeric non-dot character : {data} given.'
+					'The ip address contains a non-numeric value : {data} given.'
 				);
 			}
 			return;

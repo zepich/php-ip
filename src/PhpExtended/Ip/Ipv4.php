@@ -236,13 +236,13 @@ class Ipv4 implements Ip
 		$new = new Ipv4();
 		$add4 = $this->_oct4 + $other->_oct4;
 		$new->_oct4 = $add4 & 0x000000ff;
-		$rmd3 = ($add4 & 0x0000ff00) >> 8;
+		$rmd3 = ($add4 >> 8) & 0x000000ff;
 		$add3 = $this->_oct3 + $other->_oct3 + $rmd3;
 		$new->_oct3 = $add3 & 0x000000ff;
-		$rmd2 = ($add3 & 0x0000ff00) >> 8;
+		$rmd2 = ($add3 >> 8) & 0x000000ff;
 		$add2 = $this->_oct2 + $other->_oct2 + $rmd2;
 		$new->_oct2 = $add2 & 0x000000ff;
-		$rmd1 = ($add2 & 0x0000ff00) >> 8;
+		$rmd1 = ($add2 >> 8) & 0x000000ff;
 		$add1 = $this->_oct1 + $other->_oct1 + $rmd1;
 		$new->_oct1 = $add1 & 0x000000ff;
 		return $new;
