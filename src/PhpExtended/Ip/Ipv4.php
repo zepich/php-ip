@@ -216,10 +216,10 @@ class Ipv4 implements Ip
 	public function _not()
 	{
 		$new = new Ipv4();
-		$new->_oct1 = ~ $this->_oct1;
-		$new->_oct2 = ~ $this->_oct2;
-		$new->_oct3 = ~ $this->_oct3;
-		$new->_oct4 = ~ $this->_oct4;
+		$new->_oct1 = (~ $this->_oct1) & 0x000000ff;
+		$new->_oct2 = (~ $this->_oct2) & 0x000000ff;
+		$new->_oct3 = (~ $this->_oct3) & 0x000000ff;
+		$new->_oct4 = (~ $this->_oct4) & 0x000000ff;
 		return $new;
 	}
 	
@@ -261,6 +261,37 @@ class Ipv4 implements Ip
 		$new1 = $other->_not();
 		$new2 = $this->add($new1);
 		return $new2->add(new Ipv4(array(0, 0, 0, 1)));
+	}
+	
+	/**
+	 * Gets whether the given other thing represents exactly the same ipv4 as
+	 * this one.
+	 * 
+	 * @param mixed $object
+	 * @return boolean true if equals, false else.
+	 */
+	public function equals($object)
+	{
+		if(is_object($object) && $object instanceof Ipv4)
+		{
+			return $this->getFirstByte() === $object->getFirstByte()
+				&& $this->getSecondByte() === $object->getSecondByte()
+				&& $this->getThirdByte() === $object->getThirdByte()
+				&& $this->getLastByte() === $object->getLastByte();
+		}
+		return false;
+	}
+	
+	/**
+	 * Gets whether this ip object is included into the network represented by
+	 * given ip address and netmask.
+	 *
+	 * @param mixed $ipAddress
+	 * @return boolean
+	 */
+	public function isInRange($ipAddress, $bitmask = null)
+	{
+		return (new Ipv4Network($ipAddress, $bitmask))->contains($this);
 	}
 	
 }

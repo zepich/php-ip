@@ -109,12 +109,12 @@ class Ipv6 implements Ip
 	 * IpMalformedException will be thrown.
 	 * 
 	 * If a string which starts with '/' is provided, it will be interpreted as
-	 * the bitmask. For example, the '/64' address will be the
-	 * ffff:ffff:ffff:ffff:: address.
+	 * the bitmask. For example, the '/48' address will be the
+	 * ffff:ffff:ffff:: address.
 	 * 
 	 * If a string which starts with '\\' is provided, it will be interpreted
-	 * as the inverse bitmask. For example, the '\64' address will be the
-	 * ::ffff:ffff:ffff:ffff address.
+	 * as the inverse bitmask. For example, the '\48' address will be the
+	 * ::ffff:ffff:ffff:ffff:ffff address.
 	 * 
 	 * @param mixed $ipAddress
 	 * @throws IllegalArgumentException if the content value is not intepretable
@@ -365,14 +365,14 @@ class Ipv6 implements Ip
 	public function _not()
 	{
 		$new = new Ipv6();
-		$new->_group1 = ~ $this->_group1;
-		$new->_group2 = ~ $this->_group2;
-		$new->_group3 = ~ $this->_group3;
-		$new->_group4 = ~ $this->_group4;
-		$new->_group5 = ~ $this->_group5;
-		$new->_group6 = ~ $this->_group6;
-		$new->_group7 = ~ $this->_group7;
-		$new->_group8 = ~ $this->_group8;
+		$new->_group1 = (~ $this->_group1) & 0x0000ffff;
+		$new->_group2 = (~ $this->_group2) & 0x0000ffff;
+		$new->_group3 = (~ $this->_group3) & 0x0000ffff;
+		$new->_group4 = (~ $this->_group4) & 0x0000ffff;
+		$new->_group5 = (~ $this->_group5) & 0x0000ffff;
+		$new->_group6 = (~ $this->_group6) & 0x0000ffff;
+		$new->_group7 = (~ $this->_group7) & 0x0000ffff;
+		$new->_group8 = (~ $this->_group8) & 0x0000ffff;
 		return $new;
 	}
 	
@@ -424,6 +424,40 @@ class Ipv6 implements Ip
 		$new1 = $other->_not();
 		$new2 = $this->add($new1);
 		return $new2->add(new Ipv6(array(0, 0, 0, 0, 0, 0, 0, 1)));
+	}
+	
+	/**
+	 * Gets whether the given other thing represents exactly the same ipv6 as
+	 * this one.
+	 * 
+	 * @param unknown $object
+	 */
+	public function equals($object)
+	{
+		if(is_object($object) && $object instanceof Ipv6)
+		{
+			return $this->getFirstGroup() === $object->getFirstGroup()
+				&& $this->getSecondGroup() === $object->getSecondGroup()
+				&& $this->getThirdGroup() === $object->getThirdGroup()
+				&& $this->getFourthGroup() === $object->getFourthGroup()
+				&& $this->getFifthGroup() === $object->getFifthGroup()
+				&& $this->getSixthGroup() === $object->getSixthGroup()
+				&& $this->getSeventhGroup() === $object->getSeventhGroup()
+				&& $this->getLastGroup() === $object->getLastGroup();
+		}
+		return false;
+	}
+	
+	/**
+	 * Gets whether this ip object is included into the network represented by
+	 * given ip address and netmask. 
+	 * 
+	 * @param mixed $ipAddress
+	 * @return boolean
+	 */
+	public function isInRange($ipAddress, $bitmask = null)
+	{
+		return (new Ipv6Network($ipAddress, $bitmask))->contains($this);
 	}
 	
 }

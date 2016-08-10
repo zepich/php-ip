@@ -14,14 +14,14 @@ class Ipv4Network
 {
 	
 	/**
-	 * Gets the ipv4 that is at the start of the network range.
+	 * Gets the Ipv4 that is at the start of the network range.
 	 * 
 	 * @var Ipv4
 	 */
 	private $_start_ip = null;
 	
 	/**
-	 * Gets the number of bits that are taken by the mask.
+	 * Gets the number of bits that are taken by the mask. (0 <= x <= 32).
 	 * 
 	 * @var integer
 	 */
@@ -58,7 +58,10 @@ class Ipv4Network
 	public function __construct($ipAddress = null, $bitmask = null)
 	{
 		if($ipAddress instanceof Ipv4Network)
+		{
+			$mask = $ipAddress->getMaskBits();
 			$ipAddress = $ipAddress->getStartIp();
+		}
 		if(is_array($ipAddress) && count($ipAddress) === 5)
 		{
 			if(isset($ipAddress['mask']) && is_numeric($ipAddress['mask']))
@@ -103,6 +106,7 @@ class Ipv4Network
 			}
 		}
 		$this->_start_ip = $this->_start_ip->_and(new Ipv4('/'.$mask));
+		$this->_mask_bits = $mask;
 	}
 	
 	/**
@@ -122,7 +126,7 @@ class Ipv4Network
 	 */
 	public function getEndIp()
 	{
-		return $this->getStartIp()->_or($this->getWildmask());
+		return $this->getStartIp()->_or($this->getWildmaskIp());
 	}
 	
 	/**
@@ -130,7 +134,7 @@ class Ipv4Network
 	 * 
 	 * @return Ipv4
 	 */
-	public function getNetwork()
+	public function getNetworkIp()
 	{
 		return $this->getStartIp();
 	}
@@ -140,7 +144,7 @@ class Ipv4Network
 	 * 
 	 * @return Ipv4
 	 */
-	public function getNetmask()
+	public function getNetmaskIp()
 	{
 		return new Ipv4('/'.$this->getMaskBits());
 	}
@@ -151,7 +155,7 @@ class Ipv4Network
 	 * 
 	 * @return Ipv4
 	 */
-	public function getWildmask()
+	public function getWildmaskIp()
 	{
 		return new Ipv4('\\'.$this->getMaskBits());
 	}
@@ -171,7 +175,7 @@ class Ipv4Network
 	 * 
 	 * @return Ipv4
 	 */
-	public function getGateway()
+	public function getGatewayIp()
 	{
 		return $this->getStartIp()->add(new Ipv4(array(0, 0, 0, 1)));
 	}
@@ -181,7 +185,7 @@ class Ipv4Network
 	 * 
 	 * @return Ipv4
 	 */
-	public function getBroadcast()
+	public function getBroadcastIp()
 	{
 		return $this->getEndIp()->substract(new Ipv4(array(0, 0, 0, 1)));
 	}
@@ -191,9 +195,9 @@ class Ipv4Network
 	 * 
 	 * @return integer
 	 */
-	public function getNumberOfaddresses()
+	public function getNumberOfAddresses()
 	{
-		return 2 ** (32 - $this->getMaskBits());
+		return (2 ** (32 - $this->getMaskBits())) - 2;
 	}
 	
 	/**
@@ -227,10 +231,9 @@ class Ipv4Network
 	 * @param Ipv4 $address
 	 * @return boolean
 	 */
-	public function isIncluded(Ipv4 $address)
+	public function contains(Ipv4 $address)
 	{
-		return $this->getStartIp()->getSignedValue() <= $address->getSignedValue()
-			&& $this->getEndIp()->getSignedValue() >= $address->getSignedValue();
+		return $address->_and($this->getNetmaskIp())->equals($this->getNetworkIp());
 	}
 	
 	/**
@@ -239,11 +242,11 @@ class Ipv4Network
 	 * @param Ipv4Network $subnetwork
 	 * @return boolean
 	 */
-	public function isNetworkIncluded(Ipv4Network $subnetwork)
+	public function containsNetwork(Ipv4Network $subnetwork)
 	{
 		return $this->getMaskBits() <= $subnetwork->getMaskBits()
-			&& $this->isIncluded($subnetwork->getStartIp())
-			&& $this->isIncluded($subnetwork->getEndIp());
+			&& $this->contains($subnetwork->getStartIp())
+			&& $this->contains($subnetwork->getEndIp());
 	}
 	
 	/**
