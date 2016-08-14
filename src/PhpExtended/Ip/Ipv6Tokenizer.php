@@ -95,7 +95,7 @@ class Ipv6Tokenizer implements \Iterator
 		
 		if(is_float($content))
 		{
-			$content = (int) $float;
+			$content = (int) $content;
 		}
 		
 		if(is_int($content))
