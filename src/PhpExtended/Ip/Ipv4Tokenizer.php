@@ -179,15 +179,16 @@ class Ipv4Tokenizer implements \Iterator
 			}
 			
 			$token = '';
-			for($i = 0; $i = strlen($content); $i++)
+			for($i = 0; $i < strlen($content); $i++)
 			{
 				$char = $content[$i];
+				
 				if(is_numeric($char))
 				{
 					$token .= $char;
-					continue;
 				}
-				if($char === '.')
+				
+				if($char === '.' || $i == strlen($content) - 1)
 				{
 					$value = (int) $token;
 					if($value < 0 || $value > 255)
@@ -203,12 +204,15 @@ class Ipv4Tokenizer implements \Iterator
 						);
 					
 					$token = '';
-					continue;
 				}
-				throw new IpMalformedException($content,
-					'The ip address contains a non-numeric non-dot character : {data} given.'
-				);
+				
+				if (!is_numeric($char) && $char != '.') {
+				    throw new IpMalformedException($content,
+			            'The ip address contains a non-numeric non-dot character : {data} given.'
+		            );
+				}
 			}
+			
 			return;
 		}
 		

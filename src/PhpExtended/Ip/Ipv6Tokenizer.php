@@ -245,15 +245,14 @@ class Ipv6Tokenizer implements \Iterator
 				if($this->isHexa($char))
 				{
 					$token .= $char;
-					continue;
 				}
-				if($char === ':')
+				if($char === ':' || $i == strlen($content) - 1)
 				{
 					if($token === '')
 					{
 						break; // found ::
 					}
-					$value = dechex($token);
+					$value = hexdec($token);
 					if($value < 0 || $value > 65535)
 						throw new IllegalValueException($content,
 							'The ip address contains a number which is not between 0 and ffff : {data} given.'
@@ -267,7 +266,6 @@ class Ipv6Tokenizer implements \Iterator
 					$stack[$current] = $value;
 					$token = '';
 					$current++;
-					continue;
 				}
 				if($char === '.')
 				{
@@ -304,22 +302,24 @@ class Ipv6Tokenizer implements \Iterator
 					
 					$token = '';
 					$current++;
-					continue;
 				}
-				throw new IpMalformedException($content,
-					'The ip address contains a non-numeric non-dot non-semicolon character : {data} given.'
-				);
+				
+				if ($char !== ':' && $char !== '.' && !$this->isHexa($char)) {
+    				throw new IpMalformedException($content,
+    					'The ip address contains a non-numeric non-dot non-semicolon character : {data} given.'
+    				);
+				}
 			}
 			$token = '';
 			$current = 7;
+
 			// backward mode. we use it if we found ::
-			for($j = strlen($content); $j >= $i ; $j++)	// back to the i'th position exactly. need to find the ":"
+			for($j = strlen($content) - 1; $j >= $i ; $j--)	// back to the i'th position exactly. need to find the ":"
 			{
 				$char = $content[$j];
 				if($this->isHexa($char))
 				{
 					$token = $char.$token;
-					continue;
 				}
 				if($char === ':')
 				{
@@ -328,7 +328,7 @@ class Ipv6Tokenizer implements \Iterator
 							'The ip address contains two groups of "::" : {data} given.'
 						);
 					
-					$value = dechex($token);
+					$value = hexdec($token);
 					if($value < 0 || $value > 65535)
 						throw new IllegalValueException($content,
 							'The ip address contains a number which is not between 0 and ffff : {data} given.'
@@ -337,7 +337,6 @@ class Ipv6Tokenizer implements \Iterator
 					$stack[$current] = $value;
 					$token = '';
 					$current--;
-					continue;
 				}
 				if($char === '.')
 				{
@@ -376,11 +375,13 @@ class Ipv6Tokenizer implements \Iterator
 					$current--;
 					if($current === 3)
 						$current = 5;	// correction of offset, normal ipv6 addresses take total 8 slots but hybrids take 10
-					continue;
 				}
-				throw new IpMalformedException($content,
-					'The ip address contains a non-numeric non-dot non-semicolon character : {data} given.'
-				);
+				
+				if ($char !== ':' && $char !== '.' && !$this->isHexa($char)) {
+    				throw new IpMalformedException($content,
+    					'The ip address contains a non-numeric non-dot non-semicolon character : {data} given.'
+    				);
+				}
 			}
 			
 			$this->_object = $stack;

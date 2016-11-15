@@ -245,7 +245,7 @@ class Ipv6 implements Ip
 				if($shortcutUsed === true)
 				{
 					$desc .= '0';
-					if($c < 8)
+					if($c < 7)
 						$desc .= ':';
 				}
 				else
@@ -254,8 +254,6 @@ class Ipv6 implements Ip
 					{
 						$currentShortcut = true;
 						$desc .= ':';
-						if($c < 8)
-							$desc .= ':';
 					}
 				}
 			}
@@ -267,7 +265,7 @@ class Ipv6 implements Ip
 					$shortcutUsed = true;
 				}
 				$desc .= $hexval;
-				if($c < 8)
+				if($c < 7)
 					$desc .= ':';
 			}
 		}
