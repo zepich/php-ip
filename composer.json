@@ -1,8 +1,8 @@
 {
-	"name" : "php-extended/php-ip",
+	"name" : "zepich/php-ip",
 	"description" : "An object implementation of the ip addresses and their parsing",
 	"type" : "library",
-	"homepage" : "https://github.com/php-extended/php-ip",
+	"homepage" : "https://github.com/zepi/php-ip",
 	"license" : "MIT",
 	"authors" : [{
 			"name" : "Anastaszor",
@@ -10,8 +10,8 @@
 		}
 	],
 	"support" : {
-		"issues" : "https://github.com/php-extended/php-ip/issues",
-		"source" : "https://github.com/php-extended/php-ip"
+		"issues" : "https://github.com/zepi/php-ip/issues",
+		"source" : "https://github.com/zepi/php-ip"
 	},
 	"autoload" : {
 		"psr-4" : {
